@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <meta http-equiv="Feature-Policy" content="camera 'self'; microphone 'self'; display-capture 'self'">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+    <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Camera and Screen Recording</title>
+    <style>
+        /* ... Your existing CSS styles ... */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #video-container {
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+            border-radius: 10px 10px 0 0;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            color: #ff0000;
+        }
+        #start-screen-recording,
+        #stop-screen-recording {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ... Your existing HTML content ... -->
+
+    <button id="start-screen-recording">Start Screen Recording</button>
+    <button id="stop-screen-recording" disabled>Stop Screen Recording</button>
+
+    <!-- ... Your existing JavaScript code ... -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // ... Your existing JavaScript code ...
+
+            const startScreenRecordingButton = document.getElementById('start-screen-recording');
+            const stopScreenRecordingButton = document.getElementById('stop-screen-recording');
+
+            let screenMediaRecorder;
+            let recordedScreenChunks = [];
+
+            startScreenRecordingButton.addEventListener('click', startScreenRecording);
+            stopScreenRecordingButton.addEventListener('click', stopScreenRecording);
+
+            function startScreenRecording() {
+                recordedScreenChunks = [];
+                navigator.mediaDevices.getDisplayMedia({ video: true })
+                    .then((stream) => {
+                        screenMediaRecorder = new MediaRecorder(stream);
+
+                        screenMediaRecorder.ondataavailable = (event) => {
+                            if (event.data.size > 0) {
+                                recordedScreenChunks.push(event.data);
+                            }
+                        };
+
+                        screenMediaRecorder.onstop = () => {
+                            const blob = new Blob(recordedScreenChunks, { type: 'video/webm' });
+                            const url = URL.createObjectURL(blob);
+                            window.open(url);
+                        };
+
+                        screenMediaRecorder.start();
+                        startScreenRecordingButton.disabled = true;
+                        stopScreenRecordingButton.disabled = false;
+                    })
+                    .catch((error) => {
+                        console.error('Error accessing screen recording:', error);
+                    });
+            }
+
+            function stopScreenRecording() {
+                if (screenMediaRecorder && screenMediaRecorder.state !== 'inactive') {
+                    screenMediaRecorder.stop();
+                    startScreenRecordingButton.disabled = false;
+                    stopScreenRecordingButton.disabled = true;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
